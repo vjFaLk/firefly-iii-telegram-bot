@@ -3,3 +3,5 @@ oauth-test.py
 __pycache__
 data.json
 config.json
+firefly-env
+.vscode

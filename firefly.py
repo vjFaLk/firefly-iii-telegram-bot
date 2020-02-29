@@ -3,10 +3,11 @@ import requests
 import json
 import datetime
 
+
 class Firefly:
     def getBalances(self, username, users):
         url = users.getAPIUrl(username)+'/api/v1/accounts?type=asset'
-        hdr = { 'Authorization': "Bearer "+users.getUserAccessToken(username) }
+        hdr = {'Authorization': "Bearer "+users.getUserAccessToken(username)}
 
         req = urllib.request.Request(url, headers=hdr)
         response = urllib.request.urlopen(req)
@@ -20,7 +21,7 @@ class Firefly:
 
     def getBalancesExtended(self, username, users):
         url = users.getAPIUrl(username)+'/api/v1/accounts?type=asset'
-        hdr = { 'Authorization': "Bearer "+users.getUserAccessToken(username) }
+        hdr = {'Authorization': "Bearer "+users.getUserAccessToken(username)}
 
         req = urllib.request.Request(url, headers=hdr)
         response = urllib.request.urlopen(req)
@@ -34,7 +35,7 @@ class Firefly:
 
     def getIncomes(self, username, users):
         url = users.getAPIUrl(username)+'/api/v1/accounts?type=revenue'
-        hdr = { 'Authorization': "Bearer "+users.getUserAccessToken(username) }
+        hdr = {'Authorization': "Bearer "+users.getUserAccessToken(username)}
 
         req = urllib.request.Request(url, headers=hdr)
         response = urllib.request.urlopen(req)
@@ -47,8 +48,9 @@ class Firefly:
         return incomes
 
     def getCurrentBalance(self, username, users):
-        url = users.getAPIUrl(username)+'/api/v1/accounts/'+users.getPocketAccountId(username)
-        hdr = { 'Authorization': "Bearer "+users.getUserAccessToken(username) }
+        url = users.getAPIUrl(username)+'/api/v1/accounts/' + \
+            users.getPocketAccountId(username)
+        hdr = {'Authorization': "Bearer "+users.getUserAccessToken(username)}
 
         req = urllib.request.Request(url, headers=hdr)
         response = urllib.request.urlopen(req)
@@ -57,7 +59,7 @@ class Firefly:
 
     def getBudgets(self, username, users):
         url = users.getAPIUrl(username)+'/api/v1/budgets'
-        hdr = { 'Authorization': "Bearer "+users.getUserAccessToken(username) }
+        hdr = {'Authorization': "Bearer "+users.getUserAccessToken(username)}
 
         req = urllib.request.Request(url, headers=hdr)
         response = urllib.request.urlopen(req)
@@ -72,21 +74,24 @@ class Firefly:
     def spend(self, username, users, message_number, message_budget, message_text):
         now = datetime.datetime.now()
         url = users.getAPIUrl(username)+'/api/v1/transactions'
+        print(message_text)
         payload = {
-            "type": "withdrawal",
-            "description": message_text,
-            "date": now.strftime("%Y-%m-%d"),
-            "transactions[0][amount]": message_number,
-            "transactions[0][currency_code]": users.getPocketCurrency(username),
-            "transactions[0][source_name]": users.getPocket(username),
-            "transactions[0][budget_name]": message_budget
+            "transactions": [{
+                "type": "withdrawal",
+                "description": message_text,
+                "date": now.strftime("%Y-%m-%d"),
+                "amount": message_number,
+                "currency_code": users.getPocketCurrency(username),
+                "source_name": users.getPocket(username),
+                "budget_name": message_budget
+            }]
         }
         # Adding empty header as parameters are being sent in payload
         headers = {
             "Authorization": "Bearer "+users.getUserAccessToken(username),
             "Accept": "application/json"
         }
-        r = requests.post(url, data=payload, headers=headers)
+        r = requests.post(url, json=payload, headers=headers)
         # TODO: make a better one validation. r can be empty and will not be parsed further
         data = json.loads(r.text)
         if data["data"]:
@@ -119,7 +124,7 @@ class Firefly:
 
     def testConnection(self, username, users):
         url = users.getAPIUrl(username)+'/api/v1/configuration'
-        hdr = { 'Authorization': "Bearer "+users.getUserAccessToken(username) }
+        hdr = {'Authorization': "Bearer "+users.getUserAccessToken(username)}
 
         req = urllib.request.Request(url, headers=hdr)
         response = urllib.request.urlopen(req)
